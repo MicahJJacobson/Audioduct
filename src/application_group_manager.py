@@ -23,14 +23,12 @@ class ApplicationGroupManager:
                 sink_input = ApplicationGroups.get_sink_input_from_sink_input_index(event.index) 
                 await cls.remove_sink_input(sink_input)
 
-    #@classmethod
-    #async def listen_for_remove_sink_inputs(cls) -> void:
-    #    pulse = await Audioduct.getInstance()
-    #    async for event in pulse.subscribe_events("sink_input"):
-    #        if event.t == "remove":
-    #            print(f"remove stream, index {event.index}")
-    #            sink_input = await pulse.sink_input_info(event.index)
-    #            await cls.remove_sink_input(sink_input)
+    @classmethod
+    async def initialize(cls):
+        pulse = await Audioduct.getInstance()
+        all_sink_inputs: list[PulseSinkInputInfo] = await pulse.sink_input_list()
+        for sink_input in all_sink_inputs:
+            await cls.add_sink_input(sink_input)
 
     # call pulsectl to find the sink_inputs that are currently running
     @classmethod
@@ -58,8 +56,11 @@ class ApplicationGroupManager:
         pulse = await Audioduct.getInstance()
         application_group = ApplicationGroups.get_application_group_from_client_index(sink_input.client) # get the group that corresponds to this client index
         if application_group:  # if the client for this sink_input is already in _groups, add this to the sink_input list of that client. Otherwise, make a new ApplicationGroup with this client
-            application_group.add_sink_input(sink_input)
-            ApplicationGroups.record_sink_input_owner(sink_input)
+            if ApplicationGroups.get_sink_input_from_sink_input_index(sink_input.index) is not None: # already exists in the dictionary
+               return 
+            else:
+                application_group.add_sink_input(sink_input)
+                ApplicationGroups.record_sink_input_owner(sink_input)
         else:
             client = await pulse.client_info(sink_input.client)
             if not client: # If the client doesn't exist
