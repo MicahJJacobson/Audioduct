@@ -22,6 +22,9 @@ class ApplicationGroupManager:
                 print(f"remove stream, index {event.index}")
                 sink_input = ApplicationGroups.get_sink_input_from_sink_input_index(event.index) 
                 await cls.remove_sink_input(sink_input)
+            elif event.t == "change":
+                sink_input = await pulse.sink_input_info(event.index)
+                await cls.update_sink_input(sink_input)
 
     @classmethod
     async def initialize(cls):
@@ -85,6 +88,16 @@ class ApplicationGroupManager:
             raise RuntimeError(f"Application group for sink {sink_input} not found")
         client_index = application_group.client.index 
         ApplicationGroups.print_client_short(client_index)
+
+    @classmethod
+    async def update_sink_input(cls, sink_input: PulseSinkInputInfo) -> void:
+        pulse = await Audioduct.getInstance()
+        application_group = ApplicationGroups.get_application_group_from_client_index(sink_input.client)
+        application_group.update_sink_input(sink_input)
+        #sink_inputs = application_group.sink_inputs
+        #for si in sink_inputs:
+            #if si.index == sink_input.index:
+                
 
 
 #asyncio.run(ApplicationGroupManager.listen_for_sink_inputs())

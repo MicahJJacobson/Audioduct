@@ -24,6 +24,14 @@ class ApplicationGroup:
     def remove_sink_input(self, sink_input: PulseSinkInputInfo) -> void:
         self._sink_inputs.remove(sink_input)
 
+    # this will entirely replace a sink with a new one that has a matching index
+    def update_sink_input(self, sink_input: PulseSinkInputInfo) -> void:
+        for i, existing in enumerate(self._sink_inputs):
+            if existing.index == sink_input.index:
+                self._sink_inputs[i] = sink_input
+                return True
+        return False
+
 #async def testThatClientAndStreamsPrint():
 #    pulse = await Audioduct.getInstance()
 #    clients = await pulse.client_list()
