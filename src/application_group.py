@@ -21,6 +21,9 @@ class ApplicationGroup:
     def add_sink_input(self, sink_input: PulseSinkInputInfo) -> void:
         self._sink_inputs.append(sink_input)
 
+    def remove_sink_input(self, sink_input: PulseSinkInputInfo) -> void:
+        self._sink_inputs.remove(sink_input)
+
 #async def testThatClientAndStreamsPrint():
 #    pulse = await Audioduct.getInstance()
 #    clients = await pulse.client_list()
