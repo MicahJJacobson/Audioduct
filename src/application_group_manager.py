@@ -97,6 +97,8 @@ class ApplicationGroupManager:
         #sink_inputs = application_group.sink_inputs
         #for si in sink_inputs:
             #if si.index == sink_input.index:
+        client_index = application_group.client.index 
+        ApplicationGroups.print_client_short(client_index)
                 
 
 
