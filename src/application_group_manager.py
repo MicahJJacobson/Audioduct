@@ -68,9 +68,11 @@ class ApplicationGroupManager:
                 return
             else: # if the client exists but isn't in ApplicationGroups, build the ApplicationGroup and add it
                 application_group = await cls.build_application_group(sink_input.client)
-                
-        print(application_group.client)
-        print(application_group.sink_inputs)
+         
+        client_index = ApplicationGroups.get_client_index_from_sink_input_index(sink_input.index)
+        ApplicationGroups.print_client_short(client_index)
+        #print(application_group.client)
+        #print(application_group.sink_inputs)
 
     @classmethod
     async def remove_sink_input(cls, sink_input: PulseSinkInputInfo) -> void:
@@ -81,8 +83,8 @@ class ApplicationGroupManager:
             ApplicationGroups.forget_sink_input_owner(sink_input)
         else:
             raise RuntimeError(f"Application group for sink {sink_input} not found")
-        print(application_group.client)
-        print(application_group.sink_inputs)
+        client_index = application_group.client.index 
+        ApplicationGroups.print_client_short(client_index)
 
 
 #asyncio.run(ApplicationGroupManager.listen_for_sink_inputs())

@@ -51,4 +51,14 @@ class ApplicationGroups:
     def forget_sink_input_owner(cls, sink_input: PulseSinkInputInfo) -> void:
         cls._owner_of.pop(sink_input.index)
 
-
+    @classmethod
+    def print_client_short(cls, client_index: int):
+        print(f"Client: {cls._groups.get(client_index).client.name} {client_index}", end="")
+        for i in range(5):
+            print(" ", end="")
+        print("sink_inputs: ", end="")
+        application_group = ApplicationGroups.get_application_group_from_client_index(client_index)
+        sink_inputs = application_group.sink_inputs
+        for sink_input in sink_inputs:
+            print(f"{{Name: {sink_input.name}, Index: {sink_input.index}}}, ", end="")
+        print("")
