@@ -2,6 +2,9 @@ from audioduct import Audioduct
 import asyncio
 from application_groups import ApplicationGroups
 from application_group import ApplicationGroup
+from pulsectl import PulseIndexError
+from pulsectl import PulseError
+from listener_pulse import ListenerPulse
 
 
 class ApplicationGroupManager:
@@ -9,22 +12,29 @@ class ApplicationGroupManager:
     def __init__(self):
         raise RuntimeError("ApplicationGroupManager is a static class. Call its methods using the class name")
 
+    # Having a listener, it is generally a good idea to have a separate pulse connection for it
     @classmethod
     async def listen_for_sink_inputs(cls) -> void:
-        pulse = await Audioduct.getInstance()
+        pulse = await ListenerPulse.build()
         #groups = await ApplicationGroups.getInstance() 
         async for event in pulse.subscribe_events("sink_input"):
-            if event.t == "new":
-                print(f"new stream, index {event.index}")
-                sink_input = await pulse.sink_input_info(event.index)
-                await cls.add_sink_input(sink_input)
-            elif event.t == "remove":
-                print(f"remove stream, index {event.index}")
-                sink_input = ApplicationGroups.get_sink_input_from_sink_input_index(event.index) 
-                await cls.remove_sink_input(sink_input)
-            elif event.t == "change":
-                sink_input = await pulse.sink_input_info(event.index)
-                await cls.update_sink_input(sink_input)
+            try:
+                if event.t == "new":
+                    print(f"new stream, index {event.index}")
+                    sink_input = await pulse.sink_input_info(event.index)
+                    await cls.add_sink_input(sink_input)
+                elif event.t == "remove":
+                    print(f"remove stream, index {event.index}")
+                    sink_input = ApplicationGroups.get_sink_input_from_sink_input_index(event.index) 
+                    await cls.remove_sink_input(sink_input)
+                elif event.t == "change":
+                    print(f"updated stream, index {event.index}")
+                    sink_input = await pulse.sink_input_info(event.index)
+                    await cls.update_sink_input(sink_input)
+            except PulseError as e: # I may need to remove this later, seeing if it will run fine with this cause I keep getting it crash because of a PulseError. This was previously a PulseIndexError
+                print(e) 
+                pass
+
 
     @classmethod
     async def initialize(cls):

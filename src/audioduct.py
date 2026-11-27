@@ -25,3 +25,14 @@ class Audioduct:
         if cls._pulse is not None:
             _pulse.close()
             _pulse = None
+
+    @classmethod
+    async def reconnect(cls):
+        try:
+            pulse = cls.getInstance()
+            clients = pulse.client_list()
+        except:
+            _pulse = PulseAsync("Audioduct-client")
+            await _pulse.connect()
+            return _pulse
+
