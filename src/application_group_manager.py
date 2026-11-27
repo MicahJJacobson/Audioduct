@@ -5,6 +5,7 @@ from application_group import ApplicationGroup
 from pulsectl import PulseIndexError
 from pulsectl import PulseError
 from listener_pulse import ListenerPulse
+from pulse_builder import PulseBuilder
 
 
 class ApplicationGroupManager:
@@ -15,24 +16,25 @@ class ApplicationGroupManager:
     # Having a listener, it is generally a good idea to have a separate pulse connection for it
     @classmethod
     async def listen_for_sink_inputs(cls) -> void:
-        pulse = await ListenerPulse.build()
+        pulse = await PulseBuilder.build()
         #groups = await ApplicationGroups.getInstance() 
-        async for event in pulse.subscribe_events("sink_input"):
-            try:
-                if event.t == "new":
-                    print(f"new stream, index {event.index}")
-                    sink_input = await pulse.sink_input_info(event.index)
-                    await cls.add_sink_input(sink_input)
-                elif event.t == "remove":
-                    print(f"remove stream, index {event.index}")
-                    sink_input = ApplicationGroups.get_sink_input_from_sink_input_index(event.index) 
-                    await cls.remove_sink_input(sink_input)
-                elif event.t == "change":
-                    print(f"updated stream, index {event.index}")
-                    sink_input = await pulse.sink_input_info(event.index)
-                    await cls.update_sink_input(sink_input)
+        while True:
+            try: 
+                async for event in pulse.subscribe_events("sink_input"):
+                    if event.t == "new":
+                        print(f"new stream, index {event.index}")
+                        sink_input = await pulse.sink_input_info(event.index)
+                        await cls.add_sink_input(sink_input)
+                    elif event.t == "remove":
+                        print(f"remove stream, index {event.index}")
+                        sink_input = ApplicationGroups.get_sink_input_from_sink_input_index(event.index) 
+                        await cls.remove_sink_input(sink_input)
+                    elif event.t == "change":
+                        print(f"updated stream, index {event.index}")
+                        sink_input = await pulse.sink_input_info(event.index)
+                        await cls.update_sink_input(sink_input)
             except PulseError as e: # I may need to remove this later, seeing if it will run fine with this cause I keep getting it crash because of a PulseError. This was previously a PulseIndexError
-                print(e) 
+                await PulseBuilder.reconnect(pulse)
                 pass
 
 
