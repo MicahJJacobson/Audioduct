@@ -4,7 +4,6 @@ from application_groups import ApplicationGroups
 from application_group import ApplicationGroup
 from pulsectl import PulseIndexError
 from pulsectl import PulseError
-from listener_pulse import ListenerPulse
 from pulse_builder import PulseBuilder
 
 
