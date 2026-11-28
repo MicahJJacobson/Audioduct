@@ -35,7 +35,7 @@ class ApplicationGroupManager:
             except PulseError as e: # I may need to remove this later, seeing if it will run fine with this cause I keep getting it crash because of a PulseError. This was previously a PulseIndexError
                 pulse = await PulseBuilder.reconnect(pulse)
                 pass
-        PulseBuilder.close(pulse)
+        await PulseBuilder.close(pulse)
 
 
     @classmethod
