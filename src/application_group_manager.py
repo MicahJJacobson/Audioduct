@@ -34,8 +34,9 @@ class ApplicationGroupManager:
                         sink_input = await pulse.sink_input_info(event.index)
                         await cls.update_sink_input(sink_input)
             except PulseError as e: # I may need to remove this later, seeing if it will run fine with this cause I keep getting it crash because of a PulseError. This was previously a PulseIndexError
-                await PulseBuilder.reconnect(pulse)
+                pulse = await PulseBuilder.reconnect(pulse)
                 pass
+        PulseBuilder.close(pulse)
 
 
     @classmethod
